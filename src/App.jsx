@@ -7,8 +7,9 @@ import {
   Filler,
   Tooltip,
   Legend,
+  ArcElement, // Для PolarArea
 } from "chart.js";
-import { Radar } from "react-chartjs-2";
+import { Radar, PolarArea } from "react-chartjs-2"; // Импортируем оба компонента
 import html2canvas from "html2canvas";
 import {
   Container,
@@ -24,41 +25,46 @@ import {
   FormControl,
 } from "@mui/material";
 import { Add, Delete } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
 
-ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
+
+ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend, ArcElement);
 
 // Стили для TextField
 const customTextFieldStyle = {
   "& .MuiOutlinedInput-root": {
-    backgroundColor: "rgba(255, 255, 255, 0.9)", // Белый фон с легкой прозрачностью
-    marginBottom: "10px"
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    marginBottom: "10px",
   },
   "& .MuiOutlinedInput-root:hover": {
-    backgroundColor: "rgba(255, 255, 255, 1)", // Белый фон при наведении
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Усиление тени при наведении
+    backgroundColor: "rgba(255, 255, 255, 1)",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
   },
   "& .MuiInputLabel-root": {
-    color: "#333", // Цвет метки
-    transition: "all 0.3s ease", // Плавное изменение
+    color: "#333",
+    transition: "all 0.3s ease",
   },
   "& .MuiOutlinedInput-root.Mui-focused .MuiInputLabel-root": {
-    color: "#3f51b5", // Цвет метки при фокусе
+    color: "#3f51b5",
   },
   "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#3f51b5", // Цвет границы при фокусе
-    boxShadow: "0 0 5px rgba(63, 81, 181, 0.5)", // Легкое свечение вокруг поля
+    borderColor: "#3f51b5",
+    boxShadow: "0 0 5px rgba(63, 81, 181, 0.5)",
   },
   "& .MuiOutlinedInput-input": {
-    fontSize: "1rem", // Размер шрифта внутри поля
-    color: "#333", // Цвет текста
-    padding: "12px", // Паддинг для удобства ввода
+    fontSize: "1rem",
+    color: "#333",
+    padding: "12px",
   },
 };
-
 const BalanceWheel = () => {
-  const [labels, setLabels] = useState(["Здоровье", "Карьера", "Финансы", "Отношения", "Развитие"]);
+  const { t } = useTranslation(); // Get the translation function
+
+  const [labels, setLabels] = useState([t("sphere") + " 1", t("sphere") + " 2", t("sphere") + " 3", t("sphere") + " 4", t("sphere") + " 5"]);
   const [values, setValues] = useState([5, 7, 6, 8, 4]);
   const [color, setColor] = useState("rgba(54, 162, 235, 0.5)");
+  const [chartType, setChartType] = useState("Radar");
 
   const handleLabelChange = (index, value) => {
     setLabels((prev) => prev.map((label, i) => (i === index ? value : label)));
@@ -69,7 +75,7 @@ const BalanceWheel = () => {
   };
 
   const addAxis = () => {
-    setLabels([...labels, "Новая сфера"]);
+    setLabels([...labels, t("sphere") + " " + (labels.length + 1)]);
     setValues([...values, 0]);
   };
 
@@ -82,11 +88,15 @@ const BalanceWheel = () => {
     setColor(event.target.value);
   };
 
+  const handleChartTypeChange = (event) => {
+    setChartType(event.target.value);
+  };
+
   const data = {
     labels,
     datasets: [
       {
-        label: "Уровень удовлетворенности",
+        label: t("level"),
         data: values,
         backgroundColor: color,
         borderColor: color.replace("0.5", "1"),
@@ -106,60 +116,88 @@ const BalanceWheel = () => {
     link.click();
   };
 
+  const options = {
+    scales: {
+      r: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        position: "top",
+      },
+    },
+  };
+
   return (
     <Container maxWidth="md" style={{ textAlign: "center", padding: "20px" }}>
       <Typography variant="h4" gutterBottom>
-        Колесо Баланса
+        {t("balanceWheel")}
       </Typography>
       <Stack direction={{ xs: "column", md: "row" }} spacing={3} alignItems="center" justifyContent="center">
         <Box>
-          <FormControl fullWidth style={{ marginBottom: "20px" }}>
-            <InputLabel>Выберите цвет</InputLabel>
-            <Select value={color} onChange={handleColorChange}>
-              <MenuItem value="rgba(54, 162, 235, 0.5)">Синий</MenuItem>
-              <MenuItem value="rgba(255, 99, 132, 0.5)">Розовый</MenuItem>
-              <MenuItem value="rgba(75, 192, 192, 0.5)">Бирюзовый</MenuItem>
-              <MenuItem value="rgba(255, 159, 64, 0.5)">Оранжевый</MenuItem>
-              <MenuItem value="rgba(153, 102, 255, 0.5)">Фиолетовый</MenuItem>
-              <MenuItem value="rgba(255, 205, 86, 0.5)">Желтый</MenuItem>
-            </Select>
-          </FormControl>
+          <Stack spacing={2} direction="row"  >
+            <FormControl fullWidth style={{ marginBottom: "20px" }}>
+              <InputLabel>{t("selectColor")}</InputLabel>
+              <Select value={color} onChange={handleColorChange}>
+                <MenuItem value="rgba(54, 162, 235, 0.5)">{t("blue")}</MenuItem>
+                <MenuItem value="rgba(255, 99, 132, 0.5)">{t("pink")}</MenuItem>
+                <MenuItem value="rgba(75, 192, 192, 0.5)">{t("turquoise")}</MenuItem>
+                <MenuItem value="rgba(255, 159, 64, 0.5)">{t("orange")}</MenuItem>
+                <MenuItem value="rgba(153, 102, 255, 0.5)">{t("purple")}</MenuItem>
+                <MenuItem value="rgba(255, 205, 86, 0.5)">{t("yellow")}</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth style={{ marginBottom: "20px" }}>
+              <InputLabel>{t("selectChartType")}</InputLabel>
+              <Select value={chartType} onChange={handleChartTypeChange}>
+                <MenuItem value="Radar">Radar</MenuItem>
+                <MenuItem value="PolarArea">Polar Area</MenuItem>
+              </Select>
+            </FormControl>
+            <LanguageSwitcher />
+          </Stack>
+
           {labels.map((label, index) => (
             <Stack direction="row" spacing={1} alignItems="center" key={index}>
               <TextField
-                label={`Сфера ${index + 1}`}
+                label={`${t("sphere")} ${index + 1}`}
                 value={label}
                 onChange={(e) => handleLabelChange(index, e.target.value)}
                 fullWidth
-                sx={customTextFieldStyle} // Применяем стили
+                sx={customTextFieldStyle}
               />
               <TextField
                 type="number"
-                label="Уровень"
+                label={t("level")}
                 value={values[index]}
                 onChange={(e) => handleValueChange(index, e.target.value)}
                 inputProps={{ min: 0, max: 10 }}
                 fullWidth
-                sx={customTextFieldStyle} // Применяем стили
+                sx={customTextFieldStyle}
               />
               <IconButton onClick={() => removeAxis(index)} color="error">
                 <Delete />
               </IconButton>
             </Stack>
           ))}
-          <Button onClick={addAxis} startIcon={<Add />} variant="contained" style={{ marginTop: "10px" }}>
-            Добавить сферу
+          <Stack>
+          <Button onClick={addAxis} startIcon={<Add />} variant="contained" style={{ marginTop: "10px", backgroundColor: color }}>
+            {t("addAxis")}
           </Button>
-
-
+          <Button onClick={exportToImage} variant="contained" style={{ marginTop: "20px", backgroundColor: color }}>
+            {t("saveImage")}
+          </Button>
+          </Stack>
         </Box>
         <Box id="chart-container" style={{ width: 400, height: 400 }}>
-          <Radar data={data} options={{ scales: { r: { suggestedMin: 0, suggestedMax: 10 } } }} />
+          {chartType === "Radar" ? <Radar data={data} options={{ scales: { r: { suggestedMin: 0, suggestedMax: 10 } } }} /> : <PolarArea data={data} options={options} />}
         </Box>
       </Stack>
-      <Button onClick={exportToImage} variant="contained" style={{ marginTop: "20px" }}>
-        Сохранить как изображение
-      </Button>
+
     </Container>
   );
 };
