@@ -139,8 +139,8 @@ const BalanceWheel = () => {
       </Typography>
       <Stack direction={{ xs: "column", md: "row" }} spacing={3} alignItems="center" justifyContent="center">
         <Box>
-          <Stack spacing={2} direction="row"  >
-            <FormControl fullWidth style={{ marginBottom: "20px" }}>
+          <Stack spacing={{ xs: "5px", md: 2 }} direction={"row"} marginBottom={ 1 } >
+            <FormControl fullWidth>
               <InputLabel>{t("selectColor")}</InputLabel>
               <Select value={color} onChange={handleColorChange}>
                 <MenuItem value="rgba(54, 162, 235, 0.5)">{t("blue")}</MenuItem>
@@ -151,7 +151,7 @@ const BalanceWheel = () => {
                 <MenuItem value="rgba(255, 205, 86, 0.5)">{t("yellow")}</MenuItem>
               </Select>
             </FormControl>
-            <FormControl fullWidth style={{ marginBottom: "20px" }}>
+            <FormControl fullWidth>
               <InputLabel>{t("selectChartType")}</InputLabel>
               <Select value={chartType} onChange={handleChartTypeChange}>
                 <MenuItem value="Radar">Radar</MenuItem>

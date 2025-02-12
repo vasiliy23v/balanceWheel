@@ -13,7 +13,7 @@ const LanguageSwitcher = () => {
   };
 
   return (
-    <FormControl fullWidth style={{ minWidth: 120 }}>
+    <FormControl fullWidth >
       <Select
         value={currentLang}
         onChange={(e) => changeLanguage(e.target.value)}
